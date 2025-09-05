@@ -248,24 +248,4 @@ LLM Knowledge Extractor/
 2. **Simple NLP**: Used basic noun extraction instead of more sophisticated keyword algorithms
 3. **Limited Text Length**: Truncates very long texts to stay within API limits
 4. **No Caching**: Each request hits the LLM API (could be optimized with Redis/memory cache)
-
-## 🔮 Future Enhancements
-
-If given more time, I would add:
-- **Database Integration**: SQLite/PostgreSQL for storing analysis results
-- **Search/Filter API**: Query stored analyses by sentiment, topics, or keywords
-- **Batch Processing**: Analyze multiple texts at once
-- **Advanced NLP**: Named entity recognition, topic modeling
-- **Caching Layer**: Redis for frequently analyzed content
-- **Authentication**: User accounts and API keys
-- **Comprehensive Testing**: Unit and integration tests
-- **Rate Limiting**: API usage controls
-- **Export Features**: Download results as JSON/CSV
-- **Monitoring**: Application performance monitoring
-- **Scaling**: Kubernetes deployment for production
-
-## 📝 License
-
-This is a take-home assignment prototype. Feel free to use and modify as needed.
-
 ---
