@@ -14,6 +14,8 @@ A prototype application that extracts structured insights from unstructured text
   - Top 3 most frequent nouns as keywords
 - **Dual Interface**: Both REST API and web UI
 - **Fallback Mode**: Works without OpenAI API key using mock responses
+- **Docker Support**: Fully containerized with Docker Compose
+- **Cross-Platform**: Works on Windows, Linux, and Mac
 
 ## 🛠️ Setup Instructions
 
@@ -135,6 +137,27 @@ The project includes helper scripts for common Docker operations:
 ./docker-scripts.sh cleanup     # Stop and remove containers
 ```
 
+### Docker Features
+- **Security**: Non-root user execution, minimal base image
+- **Performance**: Multi-layer caching, NLTK data pre-downloaded
+- **Development**: Volume mounting for live code changes
+- **Health Checks**: Built-in health monitoring
+
+### Docker Troubleshooting
+```bash
+# Clean build (no cache)
+docker build --no-cache -t llm-knowledge-extractor .
+
+# Check container logs
+docker logs llm-extractor
+
+# Access container shell
+docker exec -it llm-extractor /bin/bash
+
+# Port conflicts - use different port
+docker run -p 8001:8000 llm-knowledge-extractor
+```
+
 ## 📡 API Usage
 
 ### POST /analyze
@@ -167,37 +190,58 @@ curl -X POST "http://localhost:8000/analyze" \
      -d '{"text": "Artificial intelligence is transforming industries worldwide..."}'
 ```
 
-## 🎨 Design Choices & Architecture
+## 🏗️ Architecture & Design
 
 ### Technology Stack
-- **FastAPI**: Chosen for its excellent performance, automatic API documentation, and modern Python async support
-- **OpenAI GPT-3.5-turbo**: Cost-effective LLM with good performance for text analysis tasks
-- **NLTK**: Lightweight NLP library for keyword extraction without requiring LLM calls
-- **Jinja2**: Simple templating for the web UI
-- **Pydantic**: Type safety and data validation
+- **Backend**: FastAPI (Python) - Modern, fast, with automatic API docs
+- **LLM**: OpenAI GPT-3.5-turbo - Cost-effective and reliable
+- **NLP**: NLTK - Lightweight keyword extraction
+- **Frontend**: HTML/CSS/JavaScript - Clean, responsive design
+- **Templates**: Jinja2 - Server-side rendering
+- **Containerization**: Docker with multi-stage builds
 
-### Architecture Decisions
+### Key Design Decisions
 
-1. **Hybrid Approach**: Combined LLM analysis with traditional NLP for keywords to balance cost and accuracy
+1. **Hybrid Analysis Approach**: Combined LLM analysis with traditional NLP for keywords to balance cost and accuracy
 2. **Graceful Degradation**: App works in demo mode without API keys, making it immediately runnable
 3. **Dual Interface**: Both API and web UI to demonstrate different use cases
-4. **Error Handling**: Comprehensive error handling with fallback responses
-5. **Responsive Design**: Modern, mobile-friendly web interface
+4. **Docker-First**: Fully containerized for consistent deployment across environments
+5. **Error Handling**: Comprehensive error handling with fallback responses
+6. **Responsive Design**: Modern, mobile-friendly web interface
 
-### Code Structure
-- **Single-file application**: Kept simple for rapid prototyping
-- **Async/await**: Used throughout for better performance with I/O operations
-- **Separation of concerns**: Clear separation between NLP, LLM, and web logic
-- **Type hints**: Full type annotations for better code maintainability
+### Project Structure
+```
+LLM Knowledge Extractor/
+├── main.py                 # Main FastAPI application
+├── start.py               # Startup script with dependency checks
+├── requirements.txt        # Python dependencies
+├── Dockerfile             # Docker container configuration
+├── docker-compose.yml     # Docker Compose configuration
+├── docker-scripts.ps1     # Docker helper scripts (Windows)
+├── docker-scripts.sh      # Docker helper scripts (Linux/Mac)
+├── test_example.py        # API testing script
+├── test_simple.py         # Simple functionality tests
+└── templates/
+    └── index.html         # Web UI template
+```
 
 ## ⚡ Trade-offs Made
 
-### Time Constraints (2-hour limit)
-1. **No Database**: Skipped persistent storage to focus on core functionality
-2. **No Tests**: Prioritized working code over test coverage
-3. **No Docker**: Simplified deployment without containerization
-4. **Basic Error Handling**: Implemented essential error handling but not exhaustive
-5. **Single File**: Kept everything in main.py for simplicity
+### What Was Prioritized
+- ✅ Core functionality working end-to-end
+- ✅ Clean, professional code structure
+- ✅ Comprehensive documentation
+- ✅ Error handling and graceful degradation
+- ✅ Modern, responsive UI
+- ✅ Docker containerization
+
+### What Was Deferred (Due to time constraints)
+- ❌ Database storage (SQLite/PostgreSQL)
+- ❌ Search/filter endpoints
+- ❌ Unit tests
+- ❌ Advanced error handling
+- ❌ Caching layer
+- ❌ Authentication
 
 ### Technical Trade-offs
 1. **Mock LLM Responses**: When API key is missing, provides demo functionality
@@ -214,15 +258,14 @@ If given more time, I would add:
 - **Advanced NLP**: Named entity recognition, topic modeling
 - **Caching Layer**: Redis for frequently analyzed content
 - **Authentication**: User accounts and API keys
-- **Docker Support**: Containerized deployment
 - **Comprehensive Testing**: Unit and integration tests
 - **Rate Limiting**: API usage controls
 - **Export Features**: Download results as JSON/CSV
+- **Monitoring**: Application performance monitoring
+- **Scaling**: Kubernetes deployment for production
 
 ## 📝 License
 
 This is a take-home assignment prototype. Feel free to use and modify as needed.
 
 ---
-
-**Built with ❤️ for the Jouster take-home assignment**

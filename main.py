@@ -67,7 +67,7 @@ def extract_keywords(text: str, num_keywords: int = 3) -> List[str]:
     return [word for word, count in word_freq.most_common(num_keywords)]
 
 def extract_title(text: str) -> Optional[str]:
-    """Extract a potential title from the text (first sentence or line)."""
+    """Extract a potential title from the text (first sentence or line) as fallback."""
     # Try to get the first sentence
     sentences = re.split(r'[.!?]+', text.strip())
     if sentences and sentences[0].strip():
@@ -77,6 +77,31 @@ def extract_title(text: str) -> Optional[str]:
             title = title[:97] + "..."
         return title
     return None
+
+def generate_title_from_text(text: str) -> str:
+    """Generate a proper title from text using simple heuristics."""
+    # Clean the text
+    text = text.strip()
+    
+    # Try to find a title-like pattern (first line, short sentence, or heading)
+    lines = text.split('\n')
+    for line in lines:
+        line = line.strip()
+        if line and len(line) < 100 and not line.endswith(('.', '!', '?')):
+            # This looks like a title
+            return line
+    
+    # Try first sentence if it's reasonably short
+    sentences = re.split(r'[.!?]+', text)
+    if sentences and sentences[0].strip():
+        first_sentence = sentences[0].strip()
+        if len(first_sentence) < 80:
+            return first_sentence
+    
+    # Fallback: truncate first part
+    if len(text) > 60:
+        return text[:57] + "..."
+    return text
 
 async def analyze_with_llm(text: str) -> Dict[str, Any]:
     """Use OpenAI to generate summary and extract structured metadata."""
@@ -88,7 +113,7 @@ async def analyze_with_llm(text: str) -> Dict[str, Any]:
         # Mock response for demo purposes
         return {
             "summary": "This is a mock summary generated when no OpenAI API key is provided.",
-            "title": extract_title(text),
+            "title": generate_title_from_text(text),
             "topics": ["Technology", "Innovation", "Development"],
             "sentiment": "neutral"
         }
@@ -97,14 +122,16 @@ async def analyze_with_llm(text: str) -> Dict[str, Any]:
         prompt = f"""
         Analyze the following text and provide:
         1. A 1-2 sentence summary
-        2. 3 key topics/themes
-        3. Overall sentiment (positive/neutral/negative)
+        2. A concise, descriptive title (3-8 words, title case)
+        3. 3 key topics/themes
+        4. Overall sentiment (positive/neutral/negative)
         
         Text: {text[:2000]}  # Limit text length for API
         
         Respond in JSON format:
         {{
             "summary": "1-2 sentence summary here",
+            "title": "Concise Descriptive Title",
             "topics": ["topic1", "topic2", "topic3"],
             "sentiment": "positive/neutral/negative"
         }}
@@ -132,7 +159,7 @@ async def analyze_with_llm(text: str) -> Dict[str, Any]:
         
         return {
             "summary": llm_result.get("summary", "Unable to generate summary"),
-            "title": extract_title(text),
+            "title": llm_result.get("title", generate_title_from_text(text)),
             "topics": llm_result.get("topics", ["Unknown"]),
             "sentiment": llm_result.get("sentiment", "neutral")
         }
@@ -145,7 +172,7 @@ async def analyze_with_llm(text: str) -> Dict[str, Any]:
         # Fallback response
         return {
             "summary": f"Unable to generate summary due to API error: {str(e)}",
-            "title": extract_title(text),
+            "title": generate_title_from_text(text),
             "topics": ["Analysis", "Content", "Information"],
             "sentiment": "neutral"
         }
